@@ -80,15 +80,39 @@ CentOS7的树莓派版本静态IP配置和传统方式并不相同，`/etc/sysco
 
 ```txt
 192.168.101.100 MacBook-Pro
-192.168.101.101 MacBook-Pro
+192.168.101.101 ThinkPad-X13
 192.168.101.150 pi-master
 192.168.101.151 pi-node-a
 192.168.101.152 pi-node-b
+192.168.101.153 pi-node-c
 ```
 
 ### NTP Server服务
 
-对于集群服务，时间同步是非常重要的，所有机器建议使用一台NTP Server服务器进行时间同步，确保集群内的机器时间都是一致的，具体可以查看[这篇文档](https://liyangxia.com/)进行配置
+对于集群服务，时间同步是非常重要的，所有机器建议使用一台NTP Server服务器进行时间同步，确保集群内的机器时间都是一致的，可以查看下面的操作进行配置
+
+```bash
+#安装NTP服务
+yum install ntp -y
+
+#配置NTP服务地址
+#注释21行到24行的内容
+#25、26行新加入下面的NTP服务器地址
+server time.cloudflare.com iburst
+
+#国内地址可以使用腾讯云的NTP服务
+time1.cloud.tencent.com 
+time2.cloud.tencent.com 
+time3.cloud.tencent.com
+time4.cloud.tencent.com
+time5.cloud.tencent.com
+
+#启动NTP服务
+systemctl enable --now ntpd
+
+#查看NTP启动状态
+ntpq -p
+```
 
 ### 防火墙和SELinux配置
 
@@ -170,9 +194,9 @@ curl -sfL https://get.k3s.io | sh -
 
 #Server的安装选项完整列表
 #https://docs.rancher.cn/docs/k3s/installation/install-options/server-config/_index
+
 #我的配置参数
 #K3S_NODE_NAME=pi-master 部署时定义节点名称为pi-master
-#把需要的参数追加到管道后面执行即可
 curl -sfL https://get.k3s.io | K3S_NODE_NAME=pi-master sh -
 ```
 
@@ -189,15 +213,17 @@ Agent的部署和Server唯一的区别在于Agent在安装服务的时候需要�
 ```bash
 #Agent的安装选项完整列表
 #https://docs.rancher.cn/docs/k3s/installation/install-options/agent-config/_index
+
 #我的参数配置
 #K3S_NODE_NAME=pi-node-a 部署时定义节点名称为pi-node-a
-#另一台agent需要有不同的K3S_NODE_NAME
+#每一台agent需要有不同的K3S_NODE_NAME
 #K3S_TOKEN= Server的token，文件在查看上面的Server配置
 #K3S_URL= Server的url，文件在查看上面的Server配置
+#⚠️注意:需要替换成K3s Server的IP
 curl -sfL https://get.k3s.io \
-  | K3S_TOKEN=*** \
-  K3S_URL=*** \
-  K3S_NODE_NAME=pi-node-a sh -
+| K3S_TOKEN=*** \
+K3S_URL=*** \
+K3S_NODE_NAME=pi-node-a sh -
 ```
 
 没有报错的话k3s-agent服务就会正常启动，此时回到Server端，使用`kubectl get nodes`就能查看到对应的node
@@ -212,6 +238,7 @@ NAME        STATUS   ROLES                  AGE   VERSION
 pi-master   Ready    control-plane,master   15h   v1.20.4+k3s1
 pi-node-a   Ready    <none>                 15h   v1.20.4+k3s1
 pi-node-b   Ready    <none>                 14h   v1.20.4+k3s1
+pi-node-c   Ready    <none>                 14h   v1.20.4+k3s1
 ```
 
 ## 日志问题排除
