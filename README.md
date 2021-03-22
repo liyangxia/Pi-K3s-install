@@ -241,12 +241,6 @@ pi-node-b   Ready    <none>                 14h   v1.20.4+k3s1
 pi-node-c   Ready    <none>                 14h   v1.20.4+k3s1
 ```
 
-## 日志问题排除
+## 待更新
 
-写到这里我突然饿了，必须赶紧吃饭！立刻马上！
-
-## 开始使用
-
-## 集群扩展
-
-## 延伸阅读
+因为Github Page默认只有一页，内容越来越多就导致主页内容特别长，所以近期将更新把所有内容迁移到[wiki](https://github.com/liyangxia/Pi-K3s/wiki)，预计开始时间：今日睡醒后
